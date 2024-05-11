@@ -150,6 +150,7 @@
     </ItemGroup>
     <ItemGroup>
       <Content Include="ruscorpora_content.xlsx" />
+      <Content Include="ruslib.xlsx" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>

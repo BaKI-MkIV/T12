@@ -17,7 +17,7 @@ namespace T12
         private Timer timer; // Таймер для отслеживания времени
         private bool timerStarted = false; // Флаг для отслеживания состояния таймера
         private TextBox outputTextBox; // Текстовое поле для вывода совпадений
-        private List<string> check = Loader("C:\\Users\\jacke\\Documents\\riderProject\\T12\\ruscorpora_content.xlsx");
+        private List<string> check = Loader("..\\..\\ruslib.xlsx", 0);
 
         public Form1()
         {
@@ -155,7 +155,7 @@ namespace T12
             }
         }
         
-        private static List<string> Loader(string filepath)
+        private static List<string> Loader(string filepath, int columnIndex)
         {
             List<string> words = new List<string>();
 
@@ -171,7 +171,7 @@ namespace T12
                         IRow currentRow = sheet.GetRow(row);
                         if (currentRow != null)
                         {
-                            string word = currentRow.GetCell(1).StringCellValue.ToLower(); 
+                            string word = currentRow.GetCell(columnIndex).StringCellValue.ToLower(); 
                             words.Add(word);
                         }
                     }
@@ -184,6 +184,7 @@ namespace T12
 
             return words;
         }
+
 
         private string Crop(string focus)
         {
@@ -202,11 +203,15 @@ namespace T12
             outputTextBox.Clear();
             if (target != "")
             {
+                int count = 0;
                 foreach (var it in focus)
                 {
                     if (it.StartsWith(target.ToLower()))
                     {
                         AddMatch(it);
+                        count++;
+                        if (count >= 20) // Если найдено уже 20 совпадений, прекращаем поиск
+                            break;
                     }
                 }
             }
@@ -216,6 +221,20 @@ namespace T12
         {
             // Добавляем новое совпадение в текстовое поле
             outputTextBox.AppendText(match + Environment.NewLine); // Добавляем совпадение и переходим на новую строку
+        }
+
+        private void rmv_Click(object sender, EventArgs e)
+        {
+            if (label1.Text.Length != 1)
+            {
+                label1.Text = label1.Text.Substring(0, label1.Text.Length - 1);
+                
+                ch--;
+            }
+            else
+            {
+                label1.Text = " ";
+            }
         }
     }
     
