@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Xml;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -12,8 +13,7 @@ namespace T12
     {
         private string previus = "";
         private int keyCount = 12;
-        private int currentIndex = 0; // переменная для отслеживания текущего индекса символа
-        private int ch = 0;
+        private int currentIndex = -10; // переменная для отслеживания текущего индекса символа
         private Timer timer; // Таймер для отслеживания времени
         private bool timerStarted = false; // Флаг для отслеживания состояния таймера
         private TextBox outputTextBox; // Текстовое поле для вывода совпадений
@@ -39,8 +39,7 @@ namespace T12
             Controls.Add(outputTextBox);
             CreateKeyboard();
         }
-
-
+        
         private void CreateKeyboard()
         {
             string alph = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
@@ -96,12 +95,22 @@ namespace T12
         private void button_Click(object sender, EventArgs e)
         {
             SelfButton button = (SelfButton)sender;
+            
+            if (currentIndex == -10)
+            {
+                label1.Text += " ";
+            }
 
             if (previus == "")
             {
                 previus = button.Text;
             }
 
+            if (currentIndex >= button.Text.Length || currentIndex < 0)
+            {
+                currentIndex = 0;
+            }
+            
             if (button.Text != previus)
             {
                 timer.Stop(); // Остановка таймера
@@ -109,10 +118,9 @@ namespace T12
                 Timer_Tick(timer, EventArgs.Empty);
             }
 
-
-            // Проверяем, чтобы индекс не выходил за пределы длины текста кнопки
-            if (currentIndex >= button.Text.Length)
+            if (currentIndex == -10)
             {
+                label1.Text += " ";
                 currentIndex = 0;
             }
 
@@ -132,10 +140,8 @@ namespace T12
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            Pip(check, Crop(label1.Text));
-            currentIndex = 0;
-            label1.Text += " ";
-            ch++;
+            Finder(check, Crop(label1.Text));
+            currentIndex = -10;
             
             timer.Stop();
             timerStarted = false;
@@ -145,10 +151,11 @@ namespace T12
         private void UpdateLabel(object sender)
         {
             SelfButton button = (SelfButton)sender; // Явное приведение объекта sender к типу SelfButton
-
+            
             if (button.Text != "Space")
             {
                 string labelText = label1.Text; // Получаем текущий текст метки
+                int ch = labelText.Length - 1;
                 labelText = labelText.Remove(ch, 1)
                     .Insert(ch, button.codeText[currentIndex].ToString()); // Заменяем символ в указанной позиции
                 label1.Text = labelText;
@@ -198,7 +205,7 @@ namespace T12
             return focus.Substring(lastSpaceIndex + 1);
         }
         
-        private void Pip(List<string> focus, string target)
+        private void Finder(List<string> focus, string target)
         {
             outputTextBox.Clear();
             if (target != "")
@@ -225,16 +232,16 @@ namespace T12
 
         private void rmv_Click(object sender, EventArgs e)
         {
-            if (label1.Text.Length != 1)
-            {
-                label1.Text = label1.Text.Substring(0, label1.Text.Length - 1);
-                
-                ch--;
-            }
-            else
-            {
-                label1.Text = " ";
-            }
+            label1.Text = label1.Text.Substring(0, label1.Text.Length - 1);
+            // if (label1.Text.Length != 1)
+            // {
+            //     label1.Text = label1.Text.Substring(0, label1.Text.Length - 1);
+            // }
+            // else
+            // {
+            //     label1.Text = " ";
+            // }
+            Finder(check, Crop(label1.Text));
         }
     }
     

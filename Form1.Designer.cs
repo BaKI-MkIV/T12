@@ -42,12 +42,11 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(521, 50);
             this.label1.TabIndex = 0;
-            this.label1.Text = " ";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // rmv
             // 
-            this.rmv.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rmv.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rmv.Location = new System.Drawing.Point(527, 400);
             this.rmv.Name = "rmv";
             this.rmv.Size = new System.Drawing.Size(72, 49);
