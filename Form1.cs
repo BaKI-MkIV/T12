@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using System.Xml;
+using System.Linq;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -11,32 +11,32 @@ namespace T12
 {
     public partial class Form1 : Form
     {
-        private string previus = "";
-        private int keyCount = 12;
-        private int currentIndex = -10; // переменная для отслеживания текущего индекса символа
-        private Timer timer; // Таймер для отслеживания времени
-        private bool timerStarted = false; // Флаг для отслеживания состояния таймера
-        private TextBox outputTextBox; // Текстовое поле для вывода совпадений
-        private List<string> check = Loader("..\\..\\ruslib.xlsx", 0);
+        private string _previous = "";
+        
+        private int _currentIndex = -10; // переменная для отслеживания текущего индекса символа
+        private Timer _timer; // Таймер для отслеживания времени
+        private bool _timerStarted = false; // Флаг для отслеживания состояния таймера
+        private TextBox _outputTextBox; // Текстовое поле для вывода совпадений
+        private List<string> _check = Loader("..\\..\\ruslib.xlsx", 0);
 
         public Form1()
         {
             InitializeComponent();
 
             // Инициализируем таймер
-            timer = new Timer();
-            timer.Interval = 1000; // Интервал таймера в миллисекундах (1 секунда)
-            timer.Tick += Timer_Tick; // Обработчик события таймера
+            _timer = new Timer();
+            _timer.Interval = 1000; // Интервал таймера в миллисекундах (1 секунда)
+            _timer.Tick += Timer_Tick; // Обработчик события таймера
 
             // Инициализация текстового поля вывода
-            outputTextBox = new TextBox();
-            outputTextBox.Multiline = true;
-            outputTextBox.ReadOnly = true;
-            outputTextBox.ScrollBars = ScrollBars.Vertical; // Включаем вертикальную прокрутку
-            outputTextBox.Dock = DockStyle.Right; // Докаем текстовое поле справа
-            outputTextBox.Width = 200; // Устанавливаем ширину текстового поля
-            outputTextBox.Font = new Font("Times New Roman", 14);
-            Controls.Add(outputTextBox);
+            _outputTextBox = new TextBox();
+            _outputTextBox.Multiline = true;
+            _outputTextBox.ReadOnly = true;
+            _outputTextBox.ScrollBars = ScrollBars.Vertical; // Включаем вертикальную прокрутку
+            _outputTextBox.Dock = DockStyle.Right; // Докаем текстовое поле справа
+            _outputTextBox.Width = 200; // Устанавливаем ширину текстового поля
+            _outputTextBox.Font = new Font("Times New Roman", 14);
+            Controls.Add(_outputTextBox);
             CreateKeyboard();
         }
         
@@ -44,7 +44,7 @@ namespace T12
         {
             string alph = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
 
-            List<string> alph_blocks = new List<string>();
+            List<string> alphBlocks = new List<string>();
 
             for (int i = 0; i < alph.Length; i += 3)
             {
@@ -53,7 +53,7 @@ namespace T12
                 // Получаем подстроку из строки alph, начиная с позиции i и длиной length
                 string block = alph.Substring(i, length);
                 // Добавляем подстроку в список
-                alph_blocks.Add(block);
+                alphBlocks.Add(block);
             }
 
             int x = 20;
@@ -61,13 +61,13 @@ namespace T12
             int buttonWidth = 100;
             int buttonHeight = 60;
 
-            for (int i = 0; i < alph_blocks.Count; i++)
+            for (int i = 0; i < alphBlocks.Count; i++)
             {
-                SelfButton button = new SelfButton(alph_blocks[i]);
-                button.Text = alph_blocks[i];
+                SelfButton button = new SelfButton(alphBlocks[i]);
+                button.Text = alphBlocks[i];
 
-                button.Size = new System.Drawing.Size(buttonWidth, buttonHeight);
-                button.Location = new System.Drawing.Point(x, y);
+                button.Size = new Size(buttonWidth, buttonHeight);
+                button.Location = new Point(x, y);
                 button.Click += button_Click;
                 Controls.Add(button);
 
@@ -83,9 +83,9 @@ namespace T12
             }
 
             SelfButton space = new SelfButton(" ");
-            space.Text = "Space";
-            space.Size = new System.Drawing.Size(buttonWidth, buttonHeight);
-            space.Location = new System.Drawing.Point(x, y);
+            space.Text = @"Space";
+            space.Size = new Size(buttonWidth, buttonHeight);
+            space.Location = new Point(x, y);
             space.Click += button_Click;
             Controls.Add(space);
 
@@ -96,68 +96,70 @@ namespace T12
         {
             SelfButton button = (SelfButton)sender;
             
-            if (currentIndex == -10)
+            if (_currentIndex == -10)
             {
-                label1.Text += " ";
+                label1.Text += @" ";
             }
 
-            if (previus == "")
+            if (_previous == "")
             {
-                previus = button.Text;
+                _previous = button.Text;
             }
 
-            if (currentIndex >= button.Text.Length || currentIndex < 0)
+            if (_currentIndex >= button.Text.Length || _currentIndex < 0)
             {
-                currentIndex = 0;
+                _currentIndex = 0;
             }
             
-            if (button.Text != previus)
+            if (button.Text != _previous)
             {
-                timer.Stop(); // Остановка таймера
-                timerStarted = false;
-                Timer_Tick(timer, EventArgs.Empty);
+                _timer.Stop(); // Остановка таймера
+                _timerStarted = false;
+                Timer_Tick(_timer, EventArgs.Empty);
             }
 
-            if (currentIndex == -10)
+            if (_currentIndex == -10)
             {
-                label1.Text += " ";
-                currentIndex = 0;
+                label1.Text += @" ";
+                _currentIndex = 0;
             }
 
+            
             // Обновляем текст метки
             UpdateLabel(button);
 
             // Сброс таймера до нуля и запуск, если не был запущен
-            timer.Stop();
-            timerStarted = false;
-            timer.Start();
-            timerStarted = true;
+            _timer.Stop();
+            _timerStarted = false;
+            _timer.Start();
+            _timerStarted = true;
 
-            currentIndex++;
-            previus = button.Text;
+            _currentIndex++;
+            _previous = button.Text;
         }
         
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            Finder(check, Crop(label1.Text));
-            currentIndex = -10;
+            Finder(_check, Crop(label1.Text));
+            _currentIndex = -10;
             
-            timer.Stop();
-            timerStarted = false;
-            previus = "";
+            _timer.Stop();
+            _timerStarted = false;
+            _previous = "";
         }
 
         private void UpdateLabel(object sender)
         {
             SelfButton button = (SelfButton)sender; // Явное приведение объекта sender к типу SelfButton
             
-            if (button.Text != "Space")
+            
+            if (button.Text != @"Space")
             {
                 string labelText = label1.Text; // Получаем текущий текст метки
                 int ch = labelText.Length - 1;
                 labelText = labelText.Remove(ch, 1)
-                    .Insert(ch, button.codeText[currentIndex].ToString()); // Заменяем символ в указанной позиции
+                    .Insert(ch, button.CodeText[_currentIndex].ToString()); // Заменяем символ в указанной позиции
                 label1.Text = labelText;
             }
         }
@@ -186,12 +188,24 @@ namespace T12
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при загрузке слов из файла: {ex.Message}");
+                MessageBox.Show($@"Ошибка при загрузке слов из файла: {ex.Message}");
             }
 
             return words;
         }
 
+        private List<string> Variable(string target)
+        {
+            List<string> options =  new List<string>();
+            target = target.Substring(0, target.Length - 1);
+
+            foreach (var it in _previous)
+            {
+                options.Add(target + it);
+            }
+            
+            return options;
+        }
 
         private string Crop(string focus)
         {
@@ -207,13 +221,17 @@ namespace T12
         
         private void Finder(List<string> focus, string target)
         {
-            outputTextBox.Clear();
+            _outputTextBox.Clear();
             if (target != "")
             {
+                //target = target.Substring(0, target.Length - 1);
+                Console.WriteLine(_previous);
                 int count = 0;
+                List<string> targetWords = Variable(target);
+                
                 foreach (var it in focus)
                 {
-                    if (it.StartsWith(target.ToLower()))
+                    if (targetWords.Any(word => it.StartsWith(word.ToLower())))
                     {
                         AddMatch(it);
                         count++;
@@ -227,31 +245,23 @@ namespace T12
         private void AddMatch(string match)
         {
             // Добавляем новое совпадение в текстовое поле
-            outputTextBox.AppendText(match + Environment.NewLine); // Добавляем совпадение и переходим на новую строку
+            _outputTextBox.AppendText(match + Environment.NewLine); // Добавляем совпадение и переходим на новую строку
         }
 
         private void rmv_Click(object sender, EventArgs e)
         {
             label1.Text = label1.Text.Substring(0, label1.Text.Length - 1);
-            // if (label1.Text.Length != 1)
-            // {
-            //     label1.Text = label1.Text.Substring(0, label1.Text.Length - 1);
-            // }
-            // else
-            // {
-            //     label1.Text = " ";
-            // }
-            Finder(check, Crop(label1.Text));
+            Finder(_check, Crop(label1.Text));
         }
     }
     
     public class SelfButton : Button
     {
-        public string codeText { get; set; }
+        public string CodeText { get; set; }
 
-        public SelfButton(string txt) : base()
+        public SelfButton(string txt)
         {
-            codeText = txt;
+            CodeText = txt;
         }
     }
 }
