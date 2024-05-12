@@ -136,12 +136,12 @@ namespace T12
 
             _currentIndex++;
             _previous = button.Text;
+            Finder(_check, Crop(label1.Text));
         }
         
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            Finder(_check, Crop(label1.Text));
             _currentIndex = -10;
             
             _timer.Stop();
@@ -224,8 +224,7 @@ namespace T12
             _outputTextBox.Clear();
             if (target != "")
             {
-                //target = target.Substring(0, target.Length - 1);
-                Console.WriteLine(_previous);
+                //target = target.Substring(0, target.Length - 1); <- dont need maybe
                 int count = 0;
                 List<string> targetWords = Variable(target);
                 
