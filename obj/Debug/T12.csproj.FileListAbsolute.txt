@@ -7,7 +7,6 @@ C:\Users\jacke\Documents\riderProject\T12\obj\Debug\T12.csproj.GenerateResource.
 C:\Users\jacke\Documents\riderProject\T12\obj\Debug\T12.csproj.CoreCompileInputs.cache
 C:\Users\jacke\Documents\riderProject\T12\obj\Debug\T12.exe
 C:\Users\jacke\Documents\riderProject\T12\obj\Debug\T12.pdb
-C:\Users\jacke\Documents\riderProject\T12\obj\Debug\T12.Form1.resources
 C:\Users\jacke\Documents\riderProject\T12\bin\Debug\BouncyCastle.Cryptography.dll
 C:\Users\jacke\Documents\riderProject\T12\bin\Debug\Enums.NET.dll
 C:\Users\jacke\Documents\riderProject\T12\bin\Debug\ExtendedNumerics.BigDecimal.dll
@@ -57,3 +56,4 @@ C:\Users\jacke\Documents\riderProject\T12\bin\Debug\System.Security.Cryptography
 C:\Users\jacke\Documents\riderProject\T12\bin\Debug\System.Security.Principal.Windows.xml
 C:\Users\jacke\Documents\riderProject\T12\bin\Debug\System.Text.Encoding.CodePages.xml
 C:\Users\jacke\Documents\riderProject\T12\obj\Debug\T12.csproj.CopyComplete
+C:\Users\jacke\Documents\riderProject\T12\obj\Debug\T12.Form1.resources

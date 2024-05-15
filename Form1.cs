@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using System.Linq;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -11,158 +9,19 @@ namespace T12
 {
     public partial class Form1 : Form
     {
-        private string _previous = "";
-        
-        private int _currentIndex = -10; // переменная для отслеживания текущего индекса символа
-        private Timer _timer; // Таймер для отслеживания времени
-        private bool _timerStarted = false; // Флаг для отслеживания состояния таймера
-        private TextBox _outputTextBox; // Текстовое поле для вывода совпадений
-        private List<string> _check = Loader("..\\..\\ruslib.xlsx", 0);
+        private string _alph = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+        private List<string> _check;
+        public HashTable _prototype;
 
         public Form1()
         {
             InitializeComponent();
-
-            // Инициализируем таймер
-            _timer = new Timer();
-            _timer.Interval = 1000; // Интервал таймера в миллисекундах (1 секунда)
-            _timer.Tick += Timer_Tick; // Обработчик события таймера
-
-            // Инициализация текстового поля вывода
-            _outputTextBox = new TextBox();
-            _outputTextBox.Multiline = true;
-            _outputTextBox.ReadOnly = true;
-            _outputTextBox.ScrollBars = ScrollBars.Vertical; // Включаем вертикальную прокрутку
-            _outputTextBox.Dock = DockStyle.Right; // Докаем текстовое поле справа
-            _outputTextBox.Width = 200; // Устанавливаем ширину текстового поля
-            _outputTextBox.Font = new Font("Times New Roman", 14);
-            Controls.Add(_outputTextBox);
-            CreateKeyboard();
+            _check = Loader("..\\..\\ruslib.xlsx", 0);
+            _prototype = new HashTable(_check, _alph, 3);
+            
+            _prototype.PrintTable();
         }
         
-        private void CreateKeyboard()
-        {
-            string alph = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-
-            List<string> alphBlocks = new List<string>();
-
-            for (int i = 0; i < alph.Length; i += 3)
-            {
-                // Определяем длину подстроки (не превышающую 3 символа)
-                int length = Math.Min(3, alph.Length - i);
-                // Получаем подстроку из строки alph, начиная с позиции i и длиной length
-                string block = alph.Substring(i, length);
-                // Добавляем подстроку в список
-                alphBlocks.Add(block);
-            }
-
-            int x = 20;
-            int y = 20;
-            int buttonWidth = 100;
-            int buttonHeight = 60;
-
-            for (int i = 0; i < alphBlocks.Count; i++)
-            {
-                SelfButton button = new SelfButton(alphBlocks[i]);
-                button.Text = alphBlocks[i];
-
-                button.Size = new Size(buttonWidth, buttonHeight);
-                button.Location = new Point(x, y);
-                button.Click += button_Click;
-                Controls.Add(button);
-
-                if ((i + 1) % 3 == 0)
-                {
-                    x = 20;
-                    y += buttonHeight + 15;
-                }
-                else
-                {
-                    x += buttonWidth + 15;
-                }
-            }
-
-            SelfButton space = new SelfButton(" ");
-            space.Text = @"Space";
-            space.Size = new Size(buttonWidth, buttonHeight);
-            space.Location = new Point(x, y);
-            space.Click += button_Click;
-            Controls.Add(space);
-
-
-        }
-
-        private void button_Click(object sender, EventArgs e)
-        {
-            SelfButton button = (SelfButton)sender;
-            
-            if (_currentIndex == -10)
-            {
-                label1.Text += @" ";
-            }
-
-            if (_previous == "")
-            {
-                _previous = button.Text;
-            }
-
-            if (_currentIndex >= button.Text.Length || _currentIndex < 0)
-            {
-                _currentIndex = 0;
-            }
-            
-            if (button.Text != _previous)
-            {
-                _timer.Stop(); // Остановка таймера
-                _timerStarted = false;
-                Timer_Tick(_timer, EventArgs.Empty);
-            }
-
-            if (_currentIndex == -10)
-            {
-                label1.Text += @" ";
-                _currentIndex = 0;
-            }
-
-            
-            // Обновляем текст метки
-            UpdateLabel(button);
-
-            // Сброс таймера до нуля и запуск, если не был запущен
-            _timer.Stop();
-            _timerStarted = false;
-            _timer.Start();
-            _timerStarted = true;
-
-            _currentIndex++;
-            _previous = button.Text;
-            Finder(_check, Crop(label1.Text));
-        }
-        
-
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            _currentIndex = -10;
-            
-            _timer.Stop();
-            _timerStarted = false;
-            _previous = "";
-        }
-
-        private void UpdateLabel(object sender)
-        {
-            SelfButton button = (SelfButton)sender; // Явное приведение объекта sender к типу SelfButton
-            
-            
-            if (button.Text != @"Space")
-            {
-                string labelText = label1.Text; // Получаем текущий текст метки
-                int ch = labelText.Length - 1;
-                labelText = labelText.Remove(ch, 1)
-                    .Insert(ch, button.CodeText[_currentIndex].ToString()); // Заменяем символ в указанной позиции
-                label1.Text = labelText;
-            }
-        }
         
         private static List<string> Loader(string filepath, int columnIndex)
         {
@@ -194,19 +53,6 @@ namespace T12
             return words;
         }
 
-        private List<string> Variable(string target)
-        {
-            List<string> options =  new List<string>();
-            target = target.Substring(0, target.Length - 1);
-
-            foreach (var it in _previous)
-            {
-                options.Add(target + it);
-            }
-            
-            return options;
-        }
-
         private string Crop(string focus)
         {
             
@@ -218,49 +64,101 @@ namespace T12
             
             return focus.Substring(lastSpaceIndex + 1);
         }
-        
-        private void Finder(List<string> focus, string target)
+
+        private void HeshChecker(HashTable point)
         {
-            _outputTextBox.Clear();
-            if (target != "")
+            label1.Text = "";
+            string marker = textBox1.Text;
+            if (string.IsNullOrEmpty(marker))
             {
-                //target = target.Substring(0, target.Length - 1); <- dont need maybe
-                int count = 0;
-                List<string> targetWords = Variable(target);
-                
-                foreach (var it in focus)
-                {
-                    if (targetWords.Any(word => it.StartsWith(word.ToLower())))
-                    {
-                        AddMatch(it);
-                        count++;
-                        if (count >= 20) // Если найдено уже 20 совпадений, прекращаем поиск
-                            break;
-                    }
-                }
+                return;
+            }
+
+            List<string> result = point.Search(marker);
+            
+            foreach (var it in result)
+            {
+                LabelPush(it);
             }
         }
-        
-        private void AddMatch(string match)
-        {
-            // Добавляем новое совпадение в текстовое поле
-            _outputTextBox.AppendText(match + Environment.NewLine); // Добавляем совпадение и переходим на новую строку
-        }
 
-        private void rmv_Click(object sender, EventArgs e)
+        private void LabelPush(string word)
         {
-            label1.Text = label1.Text.Substring(0, label1.Text.Length - 1);
-            Finder(_check, Crop(label1.Text));
+            label1.Text += word + Environment.NewLine;
+        }
+        
+        private void button1_Click(object sender, EventArgs e)
+        {
+            HeshChecker(_prototype);
         }
     }
     
-    public class SelfButton : Button
+    public class HashTable
     {
-        public string CodeText { get; set; }
+        private Dictionary<string, List<string>> table;
+        private string alphabet;
+        private int part;
 
-        public SelfButton(string txt)
+        public HashTable(List<string> words, string alphabet, int part)
         {
-            CodeText = txt;
+            this.alphabet = alphabet;
+            this.part = part;
+            table = new Dictionary<string, List<string>>();
+
+            foreach (var word in words)
+            {
+                Add(word);
+            }
+        }
+
+        public void Add(string word)
+        {
+            string hash = ConvertorX16(word);
+            if (!table.ContainsKey(hash))
+            {
+                table[hash] = new List<string>();
+            }
+
+            table[hash].Add(word);
+        }
+
+        public List<string> Search(string word)
+        {
+            //string hash = ConvertorX16(word);
+            if (table.ContainsKey(word))
+            {
+                return table[word];
+            }
+
+            return new List<string>();
+        }
+
+        private string ConvertorX16(string word)
+        {
+            string word16 = "";
+            string alph16 = "123456789ABC";
+            foreach (var it in word)
+            {
+                int number = alphabet.ToLower().IndexOf(char.ToLower(it));
+                word16 += alph16[(number / part)];
+            }
+            return word16;
+        }
+        
+        public void PrintTable()
+        {
+            foreach (var kvp in table)
+            {
+                
+                if (kvp.Value.Count > 1)
+                {   
+                    Console.WriteLine($"Hash: {kvp.Key}");
+                    foreach (var word in kvp.Value)
+                    {
+                        Console.WriteLine(word);
+                    }
+                }
+            }
         }
     }
 }
